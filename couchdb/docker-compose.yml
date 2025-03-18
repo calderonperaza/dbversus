@@ -1,0 +1,22 @@
+services:
+  couchdb:
+    image: couchdb:3.1.1
+    container_name: couchdb
+    restart: unless-stopped
+    environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: password
+    ports:
+      - "5984:5984"
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./init-couchdb.sh:/init-couchdb.sh
+    entrypoint: [ "sh", "/entrypoint.sh" ]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
