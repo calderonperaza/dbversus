@@ -39,4 +39,83 @@ async function categoriasConsultarCouchDB(): Promise<number> {
     return time;
 }
 
-export {categoriasInsertarCouchDB, categoriasConsultarCouchDB, categoriasConsultarUnoCouchDB};
+async function categoriasActualizarCouchDB(total:number): Promise<number> {
+    let start = new Date().getTime();
+    const docs = await $fetch('http://localhost:3000/api/couchdb/categoria/methods', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        onRequestError({ request, options, error }) {
+            return -1;
+        },
+    });
+
+    for (let i = 0; i < total; i++) {
+        const { _id, _rev } = docs[i];
+        const ldata = {
+            _id,
+            _rev,
+            nombre: "Categoria " + (i + 1) + " Actualizada",
+        }
+        await $fetch(`http://localhost:3000/api/couchdb/categoria/methods`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ldata),
+            onRequestError({ request, options, error }) {
+                return -1;
+            },
+        })        
+    }
+    let end = new Date().getTime();
+    let time = end - start;
+    return time;
+}
+
+async function categoriasConsultarAzarCouchDB(total: number): Promise<number> {
+    let start = new Date().getTime();
+
+    // Ejecutar el proceso de obtener documentos aleatorios 'total' veces
+    for (let i = 0; i < total; i++) {
+        // Obtener un documento aleatorio con el nuevo parámetro random
+        const response = await $fetch(`http://localhost:3000/api/couchdb/categoria/methods?random=true`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        //console.log(response);
+    }
+    let end = new Date().getTime();
+    let time = end - start;
+
+    return time;
+}
+
+async function categoriasEliminarCouchDB(total: number): Promise<number> {
+    let start = new Date().getTime();
+
+    // Consultar todas las categorías para obtener sus _id y _rev
+    const response = await $fetch(`http://localhost:3000/api/couchdb/categoria/methods`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    // Eliminar cada categoría por su _id y _rev
+    for (let i = 0; i < total; i++) {
+        const { _id, _rev } = response[i];
+        await $fetch(`http://localhost:3000/api/couchdb/categoria/methods?_id=${_id}&_rev=${_rev}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    let end = new Date().getTime();
+    let time = end - start;
+
+    return time;
+}
+
+
+export {categoriasInsertarCouchDB, categoriasConsultarCouchDB, categoriasConsultarAzarCouchDB, categoriasActualizarCouchDB, categoriasEliminarCouchDB};

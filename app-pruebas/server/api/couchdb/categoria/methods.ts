@@ -4,25 +4,41 @@ export default defineEventHandler(async (event) => {
     const method = event.node.req.method;
     
     switch (method) {
-        //GET todos
         case 'GET': {
             const query = getQuery(event);
             if (query.id) {
+                // Obtener un solo documento por ID
                 return await databases.categorias.get(query.id as string);
-            }
-            const docs = await databases.categorias.list({ include_docs: true });
-            return docs.rows.map((row: any) => row.doc);
-        }
+            } else if (query.count) {
+                // Obtener el número total de documentos
+                const totalResponse = await databases.categorias.list({ include_docs: false });
+                return { total: totalResponse.rows.length };
+            } else if (query.random) {
+                // Obtener un documento aleatorio
+                const totalResponse = await databases.categorias.list({ include_docs: false });
+                const totalDocs = totalResponse.rows.length;
+                const randomSkip = Math.floor(Math.random() * totalDocs);
 
-        // GET uno por id
-        case 'GET': {
-            const query = getQuery(event);
-            if (query.id) {
-                return await databases.categorias.get(query.id as string);
+                // Obtener un solo documento aleatorio con el 'skip'
+                const randomDoc = await databases.categorias.list({
+                    limit: 1,
+                    skip: randomSkip,
+                    include_docs: true,
+                });
+
+
+                if (randomDoc.rows.length > 0) {
+                    // Devolver de una fila aleatoria solo el documento aleatorio
+                    return randomDoc.rows[0].doc;
+                } else {
+                    return { error: 'No se encontró el documento aleatorio' };
+                }
+            } else {
+                // Obtener todos los documentos
+                const docs = await databases.categorias.list({ include_docs: true });
+                return docs.rows.map((row: any) => row.doc);
             }
-            const docs = await databases.categorias.list({ include_docs: true });
-            return docs.rows.map((row: any) => row.doc);
-        }
+        }       
 
         case 'POST': {
             const body = await readBody(event);
@@ -38,8 +54,8 @@ export default defineEventHandler(async (event) => {
 
         case 'DELETE': {
             const query = getQuery(event);
-            if (!query.id || !query.rev) throw new Error('Se requiere _id y _rev para eliminar');
-            return await databases.categorias.destroy(query.id as string, query.rev as string);
+            if (!query._id || !query._rev) throw new Error('Se requiere _id y _rev para eliminar');
+            return await databases.categorias.destroy(query._id as string, query._rev as string);
         }
 
         default:
