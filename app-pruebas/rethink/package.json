@@ -1,7 +1,0 @@
-{
-    "name": "rethinkdb-init",
-    "version": "1.0.0",
-    "dependencies": {
-      "rethinkdb": "^2.4.0"
-    }
-}

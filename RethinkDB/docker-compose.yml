@@ -2,34 +2,14 @@ version: '3.8'
 
 services:
   rethinkdb:
-    image: rethinkdb:latest
-    container_name: rethinkdb_container
+    image: rethinkdb:2.4
+    container_name: rethinkdb
     ports:
-      - "8080:8080"
-      - "28015:28015"
-      - "29015:29015"
-    command: rethinkdb --bind all
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 10s
-      timeout: 15s
-      retries: 3
+      - "8080:8080"     # Interfaz web de administración
+      - "28015:28015"   # Puerto de datos
+      - "29015:29015"   # Puerto de control
 
-  init-script:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: rethinkdb_init
+  initdb:
+    build: ./initdb
     depends_on:
-      rethinkdb:
-        condition: service_healthy
-    environment:
-      RETHINKDB_HOST: rethinkdb
-      RETHINKDB_PORT: 28015
-      DB_NAME: cafeteria
-      TABLES: categorias,productos,ordenes
-    restart: "no"
-
-networks:
-  default:
-    name: rethinkdb_network
+      - rethinkdb

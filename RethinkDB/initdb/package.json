@@ -1,0 +1,8 @@
+{
+  "name": "initdb",
+  "version": "1.0.0",
+  "main": "script.js",
+  "dependencies": {
+    "rethinkdb": "^2.4.0"
+  }
+}

@@ -1,0 +1,61 @@
+#debes usar una variable de entorno para la direccion de la base de datos
+#lee la documentacion de la imagen calderonperaza/dbversusapp
+#esto es para produccion dockerizado
+#para correr ejecuta
+#docker-compose up -d
+version: '3.1'
+services:
+  appversus:
+    # image: calderonperaza/dbversusapp:1.0
+    # cambiar imagen 
+    image: sams126/dbversusapp:1.0
+    container_name: appversus
+    restart: unless-stopped    
+    ports:
+      - "3000:3000"
+    environment:
+      HOST_DB: rethinkdb
+    deploy:
+          resources:
+            limits:
+              cpus: '1'
+              memory: 1G
+            reservations:
+              cpus: '1'
+              memory: 1G
+#SI LA BASE DE DATOS ES MYSQL
+  mysql:
+    image: mysql:8.0-debian
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"      
+      MYSQL_DATABASE: cafeteria      
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../mysql/cafeteria.sql:/docker-entrypoint-initdb.d/cafeteria.sql
+    deploy:
+          resources:
+            limits:
+              cpus: '1'
+              memory: 1G
+            reservations:
+              cpus: '1'
+              memory: 1G
+  
+  rethinkdb:
+    image: rethinkdb:2.4
+    container_name: rethinkdb
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "28015:28015"
+      - "29015:29015"
+
+  initdb:
+    build: ../RethinkDB/initdb
+    depends_on:
+      - rethinkdb
+
+
