@@ -1,5 +1,9 @@
 import pruebas from '../pruebas.json';
 
+const BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
+//console.log("BASE_URL: ", BASE_URL);
+
 async function categoriasInsertarCouchDB(total:number): Promise<number> {
     let start = new Date().getTime();
     for (let i = 1; i <= total; i++) {
@@ -7,7 +11,7 @@ async function categoriasInsertarCouchDB(total:number): Promise<number> {
             id: i,
             nombre: "Categoria " + i,
         }
-        await $fetch('http://localhost:3000/api/couchdb/categoria/methods', {
+        await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -16,7 +20,7 @@ async function categoriasInsertarCouchDB(total:number): Promise<number> {
             onRequestError({ request, options, error }) {
                 return -1;
             },
-        })        
+        }) 
     }
     let end = new Date().getTime();
     let time = end - start;
@@ -25,7 +29,7 @@ async function categoriasInsertarCouchDB(total:number): Promise<number> {
 
 async function categoriasConsultarCouchDB(): Promise<number> {
     let start = new Date().getTime();
-    await $fetch('http://localhost:3000/api/couchdb/categoria/methods', {
+    await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -41,7 +45,7 @@ async function categoriasConsultarCouchDB(): Promise<number> {
 
 async function categoriasActualizarCouchDB(total:number): Promise<number> {
     let start = new Date().getTime();
-    const docs = await $fetch('http://localhost:3000/api/couchdb/categoria/methods', {
+    const docs = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -58,7 +62,7 @@ async function categoriasActualizarCouchDB(total:number): Promise<number> {
             _rev,
             nombre: "Categoria " + (i + 1) + " Actualizada",
         }
-        await $fetch(`http://localhost:3000/api/couchdb/categoria/methods`, {
+        await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,7 +84,7 @@ async function categoriasConsultarAzarCouchDB(total: number): Promise<number> {
     // Ejecutar el proceso de obtener documentos aleatorios 'total' veces
     for (let i = 0; i < total; i++) {
         // Obtener un documento aleatorio con el nuevo parámetro random
-        const response = await $fetch(`http://localhost:3000/api/couchdb/categoria/methods?random=true`, {
+        const response = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods?random=true`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -97,7 +101,7 @@ async function categoriasEliminarCouchDB(total: number): Promise<number> {
     let start = new Date().getTime();
 
     // Consultar todas las categorías para obtener sus _id y _rev
-    const response = await $fetch(`http://localhost:3000/api/couchdb/categoria/methods`, {
+    const response = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     });
@@ -105,7 +109,7 @@ async function categoriasEliminarCouchDB(total: number): Promise<number> {
     // Eliminar cada categoría por su _id y _rev
     for (let i = 0; i < total; i++) {
         const { _id, _rev } = response[i];
-        await $fetch(`http://localhost:3000/api/couchdb/categoria/methods?_id=${_id}&_rev=${_rev}`, {
+        await $fetch(`${BASE_URL}/api/couchdb/categoria/methods?_id=${_id}&_rev=${_rev}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
         });

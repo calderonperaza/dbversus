@@ -1,6 +1,8 @@
+const BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
 async function resumenesContarOrdenesCouchDB(): Promise<number> {
     let start = new Date().getTime();
-    await $fetch('http://localhost:3000/api/couchdb/resumenes/countordenes', {
+    await $fetch(`${BASE_URL}/api/couchdb/resumenes/countordenes`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -16,7 +18,7 @@ async function resumenesContarOrdenesCouchDB(): Promise<number> {
 
 async function resumenesProductosCouchDB(): Promise<number> {
     let start = new Date().getTime();
-    await $fetch('http://localhost:3000/api/couchdb/resumenes/productosdiarios', {
+    await $fetch(`${BASE_URL}/api/couchdb/resumenes/productosdiarios`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -37,7 +39,7 @@ async function resumenesProductosFechaCouchDB(): Promise<number> {
     let dia = Math.floor(Math.random() * 28 + 1);
     let fecha = anio + "-" + mes + "-" + dia;
 
-    await $fetch('http://localhost:3000/api/couchdb/resumenes/productosdiariosfecha?fecha=' + fecha, {
+    await $fetch(`${BASE_URL}/api/couchdb/resumenes/productosdiariosfecha?fecha=` + fecha, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
