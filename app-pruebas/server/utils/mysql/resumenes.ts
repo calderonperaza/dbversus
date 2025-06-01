@@ -13,7 +13,7 @@ async function resumenesContarOrdenes(): Promise<number>  {
     })
     let end = new Date().getTime();
     let time = end - start;
-    return time;
+    return time;    
 }
 
 async function resumenesProductos(): Promise<number>  {

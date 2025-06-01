@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     const [anio, mes, dia] = fecha.split('-');
     const fechaNormalizada = `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}T00:00:00.000Z`;
 
-    console.log('Fecha normalizada:', fechaNormalizada);
+    //console.log('Fecha normalizada:', fechaNormalizada);
   
     try {
       const result = await db.view('ordenes', 'by_date_and_product', {
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
       // Ordenar por fecha (opcional, ya que solo hay una fecha)
       data.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
   
-      console.log('Resultado de la consulta:', JSON.stringify(data, null, 2));
+      //console.log('Resultado de la consulta:', JSON.stringify(data, null, 2));
 
       return { statusCode: 200, data };
     } catch (error) {

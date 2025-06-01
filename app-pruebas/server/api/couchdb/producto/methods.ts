@@ -6,33 +6,28 @@ export default defineEventHandler(async (event) => {
     switch (method) {
         case 'GET': {
             const query = getQuery(event);
-            if (query.id) {
+            if (query._id) {
                 // Obtener un solo documento por ID
-                return await databases.productos.get(query.id as string);
+                const _id = query._id;
+                if (_id) {
+                    try {
+                        const doc = await databases.productos.get(_id);
+                        return doc;
+                    } catch (error) {
+                        console.error(`Error al obtener documento con ID ${_id}:`, error);
+                        throw createError({
+                            statusCode: 404,
+                            statusMessage: `No se encontró el documento con ID ${_id}`,
+                        });
+                    }
+                } else {
+                    const docs = await databases.productos.list({ include_docs: true });
+                    return docs.rows.map((row: any) => row.doc);
+                }
             } else if (query.count) {
                 // Obtener el número total de documentos
                 const totalResponse = await databases.productos.list({ include_docs: false });
                 return { total: totalResponse.rows.length };
-            } else if (query.random) {
-                // Obtener un documento aleatorio
-                const totalResponse = await databases.productos.list({ include_docs: false });
-                const totalDocs = totalResponse.rows.length;
-                const randomSkip = Math.floor(Math.random() * totalDocs);
-
-                // Obtener un solo documento aleatorio con el 'skip'
-                const randomDoc = await databases.productos.list({
-                    limit: 1,
-                    skip: randomSkip,
-                    include_docs: true,
-                });
-
-
-                if (randomDoc.rows.length > 0) {
-                    // Devolver de una fila aleatoria solo el documento aleatorio
-                    return randomDoc.rows[0].doc;
-                } else {
-                    return { error: 'No se encontró el documento aleatorio' };
-                }
             } else {
                 // Obtener todos los documentos
                 const docs = await databases.productos.list({ include_docs: true });

@@ -53,4 +53,39 @@ async function resumenesProductosFechaCouchDB(): Promise<number> {
     return time;
 }
 
-export { resumenesContarOrdenesCouchDB, resumenesProductosCouchDB, resumenesProductosFechaCouchDB };
+interface TotalDiario {
+    fecha: string;
+    total: number;
+}
+
+async function resumenesTotalDiarioCouchDB(): Promise<number> {
+    let start = new Date().getTime();
+    
+    await $fetch(`${BASE_URL}/api/couchdb/resumenes/totaldiario`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    let end = new Date().getTime();
+    let time = end - start;
+    return time;
+}
+
+async function resumenesToptenCouchDB(): Promise<number> {
+    let start = new Date().getTime();
+    await $fetch(`${BASE_URL}/api/couchdb/resumenes/topten`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        onRequestError({ request, options, error }) {
+            return -1;
+        },
+    })
+    let end = new Date().getTime();
+    let time = end - start;
+    return time;
+}
+
+export { resumenesContarOrdenesCouchDB, resumenesProductosCouchDB, resumenesProductosFechaCouchDB, resumenesTotalDiarioCouchDB, resumenesToptenCouchDB };

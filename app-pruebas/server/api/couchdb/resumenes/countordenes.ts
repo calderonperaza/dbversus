@@ -24,3 +24,4 @@ export default defineEventHandler(async (event) => {
         return { statusCode: 500, error: error.message };
     }
 });
+

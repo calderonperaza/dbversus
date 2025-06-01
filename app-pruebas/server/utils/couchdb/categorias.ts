@@ -1,14 +1,13 @@
-import pruebas from '../pruebas.json';
-
 const BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
-//console.log("BASE_URL: ", BASE_URL);
+let arrayPruebas: any[] = [];
 
-async function categoriasInsertarCouchDB(total:number): Promise<number> {
+async function categoriasInsertarCouchDB(inicio:number, total:number): Promise<number> {
     let start = new Date().getTime();
-    for (let i = 1; i <= total; i++) {
+    let final = parseInt(String(inicio)) + total;
+    for (let i = inicio; i < final; i++) {
         const ldata = {
-            id: i,
+            _id: `${i}`,
             nombre: "Categoria " + i,
         }
         await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
@@ -20,7 +19,7 @@ async function categoriasInsertarCouchDB(total:number): Promise<number> {
             onRequestError({ request, options, error }) {
                 return -1;
             },
-        }) 
+        })
     }
     let end = new Date().getTime();
     let time = end - start;
@@ -37,30 +36,21 @@ async function categoriasConsultarCouchDB(): Promise<number> {
         onRequestError({ request, options, error }) {
             return -1;
         },
-    })        
+    })
     let end = new Date().getTime();
     let time = end - start;
     return time;
 }
 
-async function categoriasActualizarCouchDB(total:number): Promise<number> {
+async function categoriasActualizarCouchDB(inicio:number, total:number): Promise<number> {
     let start = new Date().getTime();
-    const docs = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        onRequestError({ request, options, error }) {
-            return -1;
-        },
-    });
 
     for (let i = 0; i < total; i++) {
-        const { _id, _rev } = docs[i];
+        const { _id, _rev } = arrayPruebas[i];
         const ldata = {
             _id,
             _rev,
-            nombre: "Categoria " + (i + 1) + " Actualizada",
+            nombre: "Categoria " + (_id) + " Actualizada",
         }
         await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
             method: 'PUT',
@@ -71,55 +61,65 @@ async function categoriasActualizarCouchDB(total:number): Promise<number> {
             onRequestError({ request, options, error }) {
                 return -1;
             },
-        })        
+        })
     }
     let end = new Date().getTime();
     let time = end - start;
     return time;
 }
 
-async function categoriasConsultarAzarCouchDB(total: number): Promise<number> {
+async function categoriasConsultarAzarCouchDB(inicio: number, total: number): Promise<number> {
     let start = new Date().getTime();
 
-    // Ejecutar el proceso de obtener documentos aleatorios 'total' veces
-    for (let i = 0; i < total; i++) {
-        // Obtener un documento aleatorio con el nuevo parámetro random
-        const response = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods?random=true`, {
+    let ids = Array.from({ length: total }, (_, i) => i + parseInt(String(inicio)));
+    for (let i = ids.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    let unicosIds = ids.slice(0, total);
+
+    //console.log("IDs únicos generados: ", unicosIds);
+    //console.log("Total de IDs únicos: ", unicosIds.length);
+
+        for (let i = 0; i < unicosIds.length; i++) {
+            let _id = unicosIds[i];
+            const result = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods?_id=${_id}`, {
+                method: 'GET',
+                headers: {
+                        'Content-Type': 'application/json',
+                },
+                onRequestError({ request, options, error }) {
+                    return -1;
+                },
+            })
+            arrayPruebas.push(result);
+        }
+    let end = new Date().getTime();
+    let time = end - start;
+    return time;
+}
+
+async function categoriasEliminarCouchDB(inicio: number, total: number): Promise<number> {
+    let start = new Date().getTime();
+    let final = (parseInt(String(inicio)) + total) - 1;
+
+    // Eliminar cada categoría por su _id y _rev
+    for (let i = inicio; i <= final; i++) {
+        const response = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods?_id=${i}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
-
-        //console.log(response);
-    }
-    let end = new Date().getTime();
-    let time = end - start;
-
-    return time;
-}
-
-async function categoriasEliminarCouchDB(total: number): Promise<number> {
-    let start = new Date().getTime();
-
-    // Consultar todas las categorías para obtener sus _id y _rev
-    const response = await $fetch(`${BASE_URL}/api/couchdb/categoria/methods`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-    });
-
-    // Eliminar cada categoría por su _id y _rev
-    for (let i = 0; i < total; i++) {
-        const { _id, _rev } = response[i];
+        const { _id, _rev } = response;
         await $fetch(`${BASE_URL}/api/couchdb/categoria/methods?_id=${_id}&_rev=${_rev}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
         });
     }
-
+    arrayPruebas = []; // Limpiar el arrayPruebas después de eliminar
     let end = new Date().getTime();
     let time = end - start;
 
     return time;
 }
-
 
 export {categoriasInsertarCouchDB, categoriasConsultarCouchDB, categoriasConsultarAzarCouchDB, categoriasActualizarCouchDB, categoriasEliminarCouchDB};

@@ -31,6 +31,18 @@ curl -s -X PUT "$COUCHDB_URL/ordenes/_design/ordenes" -H "Content-Type: applicat
     },
     "by_date_and_product": {
       "map": "function(doc) { if (doc.fecha && doc.detalle_orden) { var date = doc.fecha.split('\''T'\'')[0]; doc.detalle_orden.forEach(function(detalle) { var key = [date, doc._id, detalle.producto.id, detalle.producto.nombre]; emit(key, { cantidad: detalle.cantidad, producto_id: detalle.producto.id, nombre: detalle.producto.nombre }); }); } }"
+    },
+    "totaldiario": {
+      "map": "function(doc) { if (doc.fecha && doc.total) { var date = doc.fecha.split('\''T'\'')[0]; emit(date, doc.total); } }",
+      "reduce": "function(keys, values, rereduce) { return sum(values); }"
+    },
+    "totalgeneral": {
+      "map": "function(doc) { if (doc.type === '\''orden'\'' && doc.total) { emit(null, doc.total); } }",
+      "reduce": "function(keys, values, rereduce) { return sum(values); }"
+    },
+    "topten": {
+      "map": "function(doc) { if (doc.detalle_orden) { doc.detalle_orden.forEach(function(detalle) { emit([detalle.producto.id, detalle.producto.nombre], detalle.cantidad); }); } }",
+      "reduce": "function(keys, values, rereduce) { return sum(values); }"
     }
   }
 }'

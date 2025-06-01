@@ -32,7 +32,24 @@
                     Detalle Ordenes: <strong>{{ pruebas.ordenes.detalleoden }}</strong><br>
             
                 </div>
+                <!-- contador de donde iniciar a insertar iniciarPruebas -->
+                
                 <div class="col-3 q-ml-lg">
+                    <div>
+                        <q-input
+                            v-model="iniciarPruebas"
+                            type="number"
+                            label="Iniciar desde"
+                            outlined
+                            dense
+                            class="q-mt-md"
+                            @keyup.enter="realizarPruebas"
+                        >
+                            <template v-slot:prepend>
+                                <q-icon name="play_arrow" />
+                            </template>
+                        </q-input>
+                    </div>
                 <q-btn size="lg" :loading="cargando" @click="realizarPruebas" color="primary">Iniciar Pruebas</q-btn>
                 <q-circular-progress
                 show-value
@@ -92,8 +109,7 @@
                     <div v-for="n in mensajes" :key="n" class="q-py-xs">
                         {{ n }}
                     </div>
-                </q-scroll-area>   
-                
+                </q-scroll-area>  
             </div>
         </div>
         
@@ -107,7 +123,7 @@ import pruebas from '../server/utils/pruebas.json'
 import { categoriasInsertarCouchDB, categoriasConsultarCouchDB, categoriasConsultarAzarCouchDB, categoriasActualizarCouchDB, categoriasEliminarCouchDB } from '../server/utils/couchdb/categorias'
 import { productosInsertarCouchDB, productosConsultarCouchDB, productosConsultarAzarCouchDB, productosActualizarCouchDB, productosEliminarCouchDB } from '../server/utils/couchdb/productos'
 import { ordenesInsertarCouchDB, ordenesConsultarAzarCouchDB, ordenesActualizarCouchDB, ordenesEliminarCouchDB } from '../server/utils/couchdb/ordenes'
-import { resumenesContarOrdenesCouchDB, resumenesProductosCouchDB, resumenesProductosFechaCouchDB } from '../server/utils/couchdb/resumenes'
+import { resumenesContarOrdenesCouchDB, resumenesProductosCouchDB, resumenesProductosFechaCouchDB, resumenesTotalDiarioCouchDB, resumenesToptenCouchDB } from '../server/utils/couchdb/resumenes'
 
 
 const tiemposInsercion= ref([])
@@ -122,6 +138,7 @@ const erroresEliminacion= ref(0)
 const cargando= ref(false)
 const totalPruebas= ref(19)
 const mensajes= ref([])
+const iniciarPruebas = ref(0)
 
 //propiedad computada del porcentaje de pruebas realizadas
 const avance = computed(() => {
@@ -211,12 +228,12 @@ async function realizarPruebas() {
     
     //INSERTANDO DATOS
     mensajes.value.push("Iniciando pruebas de inserción")    
-    tiempo=await categoriasInsertarCouchDB(pruebas.categorias.insertar)
+    tiempo=await categoriasInsertarCouchDB(iniciarPruebas.value, pruebas.categorias.insertar)
     tiempo==-1? erroresInsercion.value++: tiemposInsercion.value.push(tiempo);   
     
-    tiempo=await productosInsertarCouchDB(pruebas.productos.insertar)
+    tiempo=await productosInsertarCouchDB(iniciarPruebas.value, pruebas.productos.insertar)
     tiempo==-1? erroresInsercion.value++: tiemposInsercion.value.push(tiempo);   
-    tiempo=await ordenesInsertarCouchDB(pruebas.ordenes.insertar);
+    tiempo=await ordenesInsertarCouchDB(iniciarPruebas.value, pruebas.ordenes.insertar);
     tiempo==-1? erroresInsercion.value++: tiemposInsercion.value.push(tiempo);
     
     mensajes.value.push("Iniciando pruebas de consultas")
@@ -225,28 +242,28 @@ async function realizarPruebas() {
     tiempo=await categoriasConsultarCouchDB()
     tiempo==-1? erroresConsulta.value++: tiemposConsulta.value.push(tiempo);
     
-    tiempo=await categoriasConsultarAzarCouchDB(pruebas.categorias.aleatorio)
+    tiempo=await categoriasConsultarAzarCouchDB(iniciarPruebas.value, pruebas.categorias.aleatorio)
     tiempo==-1? erroresConsulta.value++: tiemposConsulta.value.push(tiempo);
     
     tiempo=await productosConsultarCouchDB()
     tiempo==-1? erroresConsulta.value++: tiemposConsulta.value.push(tiempo);
 
-    tiempo=await productosConsultarAzarCouchDB(pruebas.productos.aleatorio)
+    tiempo=await productosConsultarAzarCouchDB(iniciarPruebas.value, pruebas.productos.aleatorio)
     tiempo==-1? erroresConsulta.value++: tiemposConsulta.value.push(tiempo);
 
     // CONSULTAMOS ORDENES AL AZAR DEBEMOS TRAER LOS DATOS DE ORDEN Y SUS DETALLES    
-    tiempo=await ordenesConsultarAzarCouchDB(pruebas.ordenes.aleatorio)
+    tiempo=await ordenesConsultarAzarCouchDB(iniciarPruebas.value, pruebas.ordenes.aleatorio)
     tiempo==-1? erroresConsulta.value++: tiemposConsulta.value.push(tiempo);
 
     //ACTUALIZACION DE DATOS
     mensajes.value.push("Iniciando pruebas de actualización")
     
-    tiempo=await categoriasActualizarCouchDB(pruebas.categorias.actualizar)
+    tiempo=await categoriasActualizarCouchDB(iniciarPruebas.value, pruebas.categorias.actualizar)
     tiempo==-1? erroresActualizacion.value++: tiemposActualizacion.value.push(tiempo);
     
-    tiempo=await productosActualizarCouchDB(pruebas.productos.actualizar)
+    tiempo=await productosActualizarCouchDB(iniciarPruebas.value, pruebas.productos.actualizar)
     tiempo==-1? erroresActualizacion.value++: tiemposActualizacion.value.push(tiempo);
-    tiempo=await ordenesActualizarCouchDB(pruebas.ordenes.actualizar)
+    tiempo=await ordenesActualizarCouchDB(iniciarPruebas.value, pruebas.ordenes.actualizar)
     tiempo==-1? erroresActualizacion.value++: tiemposActualizacion.value.push(tiempo);
     
     //Consultas de Resumentes o Totales -Avanzadas
@@ -257,19 +274,19 @@ async function realizarPruebas() {
     tiempo==-1? erroresConsulta.value++: tiemposResumen.value.push(tiempo);
     tiempo=await resumenesProductosFechaCouchDB()
     tiempo==-1? erroresConsulta.value++: tiemposResumen.value.push(tiempo);
-    //tiempo=await resumenesTotalDiario()
-    //tiempo==-1? erroresConsulta.value++: tiemposResumen.value.push(tiempo);
-    //tiempo=await resumenesTopten()
-    //tiempo==-1? erroresConsulta.value++: tiemposResumen.value.push(tiempo);
+    tiempo=await resumenesTotalDiarioCouchDB()
+    tiempo==-1? erroresConsulta.value++: tiemposResumen.value.push(tiempo);
+    tiempo=await resumenesToptenCouchDB ()
+    tiempo==-1? erroresConsulta.value++: tiemposResumen.value.push(tiempo);
 
     //Eliminacion de datos
     mensajes.value.push("Iniciando pruebas de eliminación")
-    tiempo=await ordenesEliminarCouchDB(pruebas.ordenes.insertar)
+    tiempo=await ordenesEliminarCouchDB(iniciarPruebas.value, pruebas.ordenes.insertar)
     tiempo==-1? erroresEliminacion.value++: tiemposEliminacion.value.push(tiempo);
-    tiempo=await productosEliminarCouchDB(pruebas.productos.insertar)
+    tiempo=await productosEliminarCouchDB(iniciarPruebas.value, pruebas.productos.insertar)
     tiempo==-1? erroresEliminacion.value++: tiemposEliminacion.value.push(tiempo);
     
-    tiempo=await categoriasEliminarCouchDB(pruebas.categorias.insertar)
+    tiempo=await categoriasEliminarCouchDB(iniciarPruebas.value, pruebas.categorias.insertar)
     tiempo==-1? erroresEliminacion.value++: tiemposEliminacion.value.push(tiempo);
 
     //console.log("Terminaron las pruebas realizadas")
