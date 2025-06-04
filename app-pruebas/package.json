@@ -12,6 +12,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.11",
     "mysql2": "^3.10.0",
+    "nano": "^10.1.4",
     "nuxt": "^3.11.2",
     "nuxt-quasar-ui": "^2.1.2",
     "quasar": "^2.16.4",
