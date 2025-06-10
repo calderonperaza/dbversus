@@ -13,7 +13,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - HOST_DB=scylla_container
+      - HOST_DB=couchdb
     deploy:
           resources:
             limits:
@@ -43,27 +43,27 @@ services:
   #             cpus: '1'
   #             memory: 1G
   #SI LA BASE DE DATOS ES COUCHDB
-  # couchdb:
-  #   image: couchdb:3.1.1
-  #   container_name: couchdb
-  #   restart: unless-stopped
-  #   environment:
-  #     COUCHDB_USER: admin
-  #     COUCHDB_PASSWORD: password
-  #   ports:
-  #     - "5984:5984"
-  #   volumes:
-  #     - ../couchdb/entrypoint.sh:/entrypoint.sh
-  #     - ../couchdb/init-couchdb.sh:/init-couchdb.sh
-  #   entrypoint: [ "sh", "/entrypoint.sh" ]
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1'
-  #         memory: 1G
-  #       reservations:
-  #         cpus: '1'
-  #         memory: 1G
+  couchdb:
+    image: couchdb:3.1.1
+    container_name: couchdb
+    restart: unless-stopped
+    environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: password
+    ports:
+      - "5984:5984"
+    volumes:
+      - ../couchdb/entrypoint.sh:/entrypoint.sh
+      - ../couchdb/init-couchdb.sh:/init-couchdb.sh
+    entrypoint: [ "sh", "/entrypoint.sh" ]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
   #SI LA BASE DE DATOS ES MONGODB
   # mongodb:
   #   image: mongo:6.0
@@ -83,35 +83,35 @@ services:
   #       reservations:
   #         cpus: '1'
   #         memory: 1G
-#SI LA BASE DE DATOS ES SCYLLADB
-  scylla:
-    image: scylladb/scylla:5.4
-    container_name: scylla_container
-    restart: unless-stopped
-    ports:
-      - "9042:9042"
-    command: --smp 1 --memory 750M --developer-mode 1
-    environment:
-      - SCYLLA_DEVELOPER_MODE=1
-    volumes:
-      - ../csylladb/init.cql:/init.cql
-    healthcheck:
-      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
-      interval: 20s
-      timeout: 10s
-      retries: 10
+# #SI LA BASE DE DATOS ES SCYLLADB
+#   scylla:
+#     image: scylladb/scylla:5.4
+#     container_name: scylla_container
+#     restart: unless-stopped
+#     ports:
+#       - "9042:9042"
+#     command: --smp 1 --memory 750M --developer-mode 1
+#     environment:
+#       - SCYLLA_DEVELOPER_MODE=1
+#     volumes:
+#       - ../csylladb/init.cql:/init.cql
+#     healthcheck:
+#       test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
+#       interval: 20s
+#       timeout: 10s
+#       retries: 10
 
-  initdb:
-    image: scylladb/scylla:5.4
-    depends_on:
-      scylla:
-        condition: service_healthy
-    entrypoint: ["/bin/bash", "-c", "cqlsh scylla 9042 -f /init.cql"]
-    volumes:
-      - ../csylladb/init.cql:/init.cql
-    environment:
-      - CQLSH_HOST=scylla
-    restart: "no"
+#   initdb:
+#     image: scylladb/scylla:5.4
+#     depends_on:
+#       scylla:
+#         condition: service_healthy
+#     entrypoint: ["/bin/bash", "-c", "cqlsh scylla 9042 -f /init.cql"]
+#     volumes:
+#       - ../csylladb/init.cql:/init.cql
+#     environment:
+#       - CQLSH_HOST=scylla
+#     restart: "no"
 # #SI LA BASE ES RETHINKDB
   # rethinkdb:
   #   image: rethinkdb:2.4
