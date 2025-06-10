@@ -43,6 +43,8 @@ services:
   #             cpus: '1'
   #             memory: 1G
   #SI LA BASE DE DATOS ES COUCHDB
+  #ojo para que funcione los archivos entrypoint.sh e init-couchdb.sh deben tener formato LF
+  # y no CRLF, debes abrir el archivo en un editor de texto y cambiar el formato
   couchdb:
     image: couchdb:3.1.1
     container_name: couchdb
@@ -64,7 +66,7 @@ services:
         reservations:
           cpus: '1'
           memory: 1G
-  #SI LA BASE DE DATOS ES MONGODB
+  # #SI LA BASE DE DATOS ES MONGODB
   # mongodb:
   #   image: mongo:6.0
   #   container_name: mongo
@@ -84,34 +86,33 @@ services:
   #         cpus: '1'
   #         memory: 1G
 # #SI LA BASE DE DATOS ES SCYLLADB
-#   scylla:
-#     image: scylladb/scylla:5.4
-#     container_name: scylla_container
-#     restart: unless-stopped
-#     ports:
-#       - "9042:9042"
-#     command: --smp 1 --memory 750M --developer-mode 1
-#     environment:
-#       - SCYLLA_DEVELOPER_MODE=1
-#     volumes:
-#       - ../csylladb/init.cql:/init.cql
-#     healthcheck:
-#       test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
-#       interval: 20s
-#       timeout: 10s
-#       retries: 10
-
-#   initdb:
-#     image: scylladb/scylla:5.4
-#     depends_on:
-#       scylla:
-#         condition: service_healthy
-#     entrypoint: ["/bin/bash", "-c", "cqlsh scylla 9042 -f /init.cql"]
-#     volumes:
-#       - ../csylladb/init.cql:/init.cql
-#     environment:
-#       - CQLSH_HOST=scylla
-#     restart: "no"
+  # scylla:
+  #   image: scylladb/scylla:5.4
+  #   container_name: scylla_container
+  #   restart: unless-stopped
+  #   ports:
+  #     - "9042:9042"
+  #   command: --smp 1 --memory 750M --developer-mode 1
+  #   environment:
+  #     - SCYLLA_DEVELOPER_MODE=1
+  #   volumes:
+  #     - ../csylladb/init.cql:/init.cql
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
+  #     interval: 20s
+  #     timeout: 10s
+  #     retries: 10
+  # initdb:
+  #   image: scylladb/scylla:5.4
+  #   depends_on:
+  #     scylla:
+  #       condition: service_healthy
+  #   entrypoint: ["/bin/bash", "-c", "cqlsh scylla 9042 -f /init.cql"]
+  #   volumes:
+  #     - ../csylladb/init.cql:/init.cql
+  #   environment:
+  #     - CQLSH_HOST=scylla
+  #   restart: "no"
 # #SI LA BASE ES RETHINKDB
   # rethinkdb:
   #   image: rethinkdb:2.4
