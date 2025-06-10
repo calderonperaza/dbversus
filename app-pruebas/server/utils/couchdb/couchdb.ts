@@ -1,7 +1,7 @@
 import nano from "nano";
 
 // Define la URL de CouchDB
-const COUCHDB_HOST = process.env.COUCHDB_HOST || "couchdb"; // Nombre del contenedor de CouchDB
+const COUCHDB_HOST = process.env.HOST_DB || "localhost"; // Nombre del contenedor de CouchDB
 const COUCHDB_PORT = "5984";
 const COUCHDB_URL = `http://${COUCHDB_HOST}:${COUCHDB_PORT}`;
 const USER = "admin";
